@@ -36,14 +36,38 @@ public:
   { *iter = _initial;
   }
 };
+
+struct initial_weight_feature_mask
+{
+private:
+  weight _initial;
+public:
+  initial_weight_feature_mask(weight initial) : _initial(initial) {}
+  void operator()(weight_parameters::iterator& iter, uint64_t /*index*/)
+  { if (*iter)
+      *iter = _initial;
+  }
+};
+
 void random_positive(weight_parameters::iterator& iter, uint64_t ind)
 { *iter = (float)(0.1 * merand48(ind));
+}
+
+void random_positive_feature_mask(weight_parameters::iterator& iter, uint64_t ind)
+{ if (*iter)
+    *iter = (float)(0.1 * merand48(ind));
 }
 
 void random_weights(weight_parameters::iterator& iter, uint64_t ind)
 { *iter = (float)(merand48(ind) - 0.5);
 }
-void initialize_regressor(vw& all)
+
+void random_weights_feature_mask(weight_parameters::iterator& iter, uint64_t ind)
+{ if (*iter)
+    *iter = (float)(merand48(ind) - 0.5);
+}
+
+void allocate_regressor_weights(vw& all)
 { // Regressor is already initialized.
   if (all.weights.not_null())
     return;
@@ -55,14 +79,34 @@ void initialize_regressor(vw& all)
   }
   if (!all.weights.not_null())
   { THROW(" Failed to allocate weight array with " << all.num_bits << " bits: try decreasing -b <bits>"); }
-  else if (all.initial_weight != 0.)
-  { initial_weight init(all.initial_weight);
-    all.weights.set_default<initial_weight>(init);
+}
+
+void initialize_regressor_weights(vw& all) {
+  if (all.vm.count("feature_mask")) {
+    if (all.initial_weight != 0.)
+    { initial_weight_feature_mask init(all.initial_weight);
+      all.weights.set_default<initial_weight_feature_mask>(init);
+    }
+    else if (all.random_positive_weights)
+      all.weights.set_default<random_positive_feature_mask>();
+    else if (all.random_weights)
+      all.weights.set_default<random_weights_feature_mask>();
+  } else {
+    if (all.initial_weight != 0.)
+    { initial_weight init(all.initial_weight);
+      all.weights.set_default<initial_weight>(init);
+    }
+    else if (all.random_positive_weights)
+      all.weights.set_default<random_positive>();
+    else if (all.random_weights)
+      all.weights.set_default<random_weights>();
   }
-  else if (all.random_positive_weights)
-    all.weights.set_default<random_positive>();
-  else if (all.random_weights)
-    all.weights.set_default<random_weights>();
+}
+
+void initialize_regressor(vw& all)
+{ // if you use this, then --initial_weight is ignored if -i / --feature_mask are used
+  allocate_regressor_weights(all);
+  initialize_regressor_weights(all);
 }
 
 const size_t default_buf_size = 512;

@@ -125,8 +125,7 @@ void learn(svrg& s, base_learner& base, example& ec)
 
 void save_load(svrg& s, io_buf& model_file, bool read, bool text)
 { if (read)
-  { initialize_regressor(*s.all);
-  }
+    allocate_regressor_weights(*s.all);
 
   if (model_file.files.size() > 0)
   { bool resume = s.all->save_resume;
@@ -141,6 +140,9 @@ void save_load(svrg& s, io_buf& model_file, bool read, bool text)
       GD::save_load_regressor(*s.all, model_file, read, text);
 
   }
+
+  if (read)
+    initialize_regressor_weights(*s.all);
 }
 
 }

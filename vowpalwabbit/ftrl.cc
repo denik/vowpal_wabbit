@@ -177,7 +177,7 @@ void learn_pistol(ftrl& a, base_learner& base, example& ec)
 void save_load(ftrl& b, io_buf& model_file, bool read, bool text)
 { vw* all = b.all;
   if (read)
-    initialize_regressor(*all);
+    allocate_regressor_weights(*all);
 
   if (model_file.files.size() > 0)
   { bool resume = all->save_resume;
@@ -190,6 +190,9 @@ void save_load(ftrl& b, io_buf& model_file, bool read, bool text)
     else
       GD::save_load_regressor(*all, model_file, read, text);
   }
+
+  if (read)
+    initialize_regressor_weights(*all);
 }
 
 void end_pass(ftrl& g)

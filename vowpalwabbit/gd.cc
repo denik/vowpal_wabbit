@@ -789,8 +789,7 @@ public:
 void save_load(gd& g, io_buf& model_file, bool read, bool text)
 { vw& all = *g.all;
   if(read)
-  { initialize_regressor(all);
-
+  { allocate_regressor_weights(all);
     if (all.adaptive && all.initial_t > 0)
     { initial_t init(all.initial_t);
       all.weights.set_default<initial_t>(init); //for adaptive update, we interpret initial_t as previously seeing initial_t fake datapoints, all with squared gradient=1
@@ -798,8 +797,6 @@ void save_load(gd& g, io_buf& model_file, bool read, bool text)
       //feature_range*initial_t, or something like that. We could potentially fix this by just adding this base quantity times the current range to the sum of gradients
       //stored in memory at each update, and always start sum of gradients to 0, at the price of additional additions and multiplications during the update...
     }
-    if (g.initial_constant != 0.0)
-      VW::set_weight(all, constant, 0, g.initial_constant);
   }
 
   if (model_file.files.size() > 0)
@@ -817,6 +814,13 @@ void save_load(gd& g, io_buf& model_file, bool read, bool text)
     }
     else
       save_load_regressor(all, model_file, read, text);
+  }
+
+  if (read) {
+    initialize_regressor_weights(all);
+
+    if (g.initial_constant != 0.0)
+      VW::set_weight(all, constant, 0, g.initial_constant);
   }
 }
 

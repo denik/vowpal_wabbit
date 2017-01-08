@@ -14,6 +14,8 @@ void parse_regressor_args(vw& all, io_buf& io_temp);
 
 void finalize_regressor(vw& all, std::string reg_name);
 void initialize_regressor(vw& all);
+void allocate_regressor_weights(vw& all);
+void initialize_regressor_weights(vw& all);
 
 void save_predictor(vw& all, std::string reg_name, size_t current_pass);
 void save_load_header(vw& all, io_buf& model_file, bool read, bool text);
