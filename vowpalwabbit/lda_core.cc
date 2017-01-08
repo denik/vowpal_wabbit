@@ -682,7 +682,7 @@ void save_load(lda &l, io_buf &model_file, bool read, bool text)
   uint64_t length = (uint64_t)1 << all->num_bits;
   if (read)
   { initialize_regressor(*all);
-    initial_weights init(all->initial_t, (float)(l.lda_D / all->lda / all->length() * 200), all->random_weights, all->lda);
+    initial_weights init(all->initial_weight, (float)(l.lda_D / all->lda / all->length() * 200), all->random_weights, all->lda);
     all->weights.set_default<initial_weights>(init);
 
   }
